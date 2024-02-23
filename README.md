@@ -1,3 +1,4 @@
+[![Rust](https://github.com/jordan-schnur/Rustic-Print/actions/workflows/.rust.yml/badge.svg)](https://github.com/jordan-schnur/Rustic-Print/actions/workflows/.rust.yml)
 # Rustic Print
 
 ## Overview

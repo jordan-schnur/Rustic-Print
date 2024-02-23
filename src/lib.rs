@@ -130,8 +130,7 @@ impl<'a> Table<'a> {
     }
 
     fn create_line(&self, filler: char) -> String {
-        self
-            .column_widths
+        self.column_widths
             .iter()
             .map(|&len| filler.to_string().repeat(len + 2))
             .collect::<Vec<_>>()
@@ -144,20 +143,39 @@ impl<'a> Table<'a> {
 
         // Print headers
         let header_str = self
-            .headers.iter().enumerate()
+            .headers
+            .iter()
+            .enumerate()
             .map(|(i, header)| {
-                format!(" {}{}{} ", ConsoleColor::Green.to_fg_ansi_code(), header, " ".repeat(self.column_widths[i].saturating_sub(header.len())))
+                format!(
+                    " {}{}{} ",
+                    ConsoleColor::Green.to_fg_ansi_code(),
+                    header,
+                    " ".repeat(self.column_widths[i].saturating_sub(header.len()))
+                )
             })
-            .collect::<Vec<_>>().join(" ") + CLEAR_COLOR;
+            .collect::<Vec<_>>()
+            .join(" ")
+            + CLEAR_COLOR;
         println!("{}", header_str);
 
         println!("{}", border_line);
 
         // Print rows
         for row in &self.rows {
-            let row_str = row.iter().enumerate().map(|(i, cell)| {
-                format!(" {}{} ", cell, " ".repeat(self.column_widths[i].saturating_sub(cell.len())))
-            }).collect::<Vec<_>>().join(" ") + CLEAR_COLOR;
+            let row_str = row
+                .iter()
+                .enumerate()
+                .map(|(i, cell)| {
+                    format!(
+                        " {}{} ",
+                        cell,
+                        " ".repeat(self.column_widths[i].saturating_sub(cell.len()))
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join(" ")
+                + CLEAR_COLOR;
             println!("{}", row_str);
         }
 
@@ -201,7 +219,7 @@ impl RusticPrint {
                     "{}{}{}{}{}\r\n",
                     foreground, background, prefix, padding_line, CLEAR_COLOR
                 )
-                    .as_str(),
+                .as_str(),
             );
         }
 
@@ -236,7 +254,7 @@ impl RusticPrint {
                         "{}{}{}{}{}\r\n",
                         foreground, background, pushed_line, finish_block, CLEAR_COLOR
                     )
-                        .as_str(),
+                    .as_str(),
                 );
 
                 current_line.clear();
@@ -263,7 +281,7 @@ impl RusticPrint {
                     "{}{}{}{}{}\r\n",
                     foreground, background, pushed_line, finish_block, CLEAR_COLOR
                 )
-                    .as_str(),
+                .as_str(),
             );
         }
 
@@ -273,7 +291,7 @@ impl RusticPrint {
                     "{}{}{}{}{}\r\n",
                     foreground, background, prefix, padding_line, CLEAR_COLOR
                 )
-                    .as_str(),
+                .as_str(),
             );
         }
 

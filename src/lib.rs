@@ -1,3 +1,8 @@
+pub mod block_options;
+pub mod console_color;
+pub mod style_options;
+pub mod table;
+
 use crossterm::{
     event::{read, Event, KeyCode},
     execute,
@@ -6,182 +11,13 @@ use crossterm::{
 };
 use std::io;
 use std::io::{Read, Write};
+use crossterm::style::{Color, Colors};
+use crate::block_options::BlockOptions;
+use crate::console_color::ConsoleColor;
+use crate::style_options::StyleOptions;
+use crate::table::Table;
 
 pub struct RusticPrint {}
-
-pub enum ConsoleColor {
-    Black,
-    Red,
-    Green,
-    Yellow,
-    Blue,
-    Magenta,
-    Cyan,
-    White,
-    BrightBlack,
-    BrightRed,
-    BrightGreen,
-    BrightYellow,
-    BrightBlue,
-    BrightMagenta,
-    BrightCyan,
-    BrightWhite,
-}
-
-impl ConsoleColor {
-    pub fn to_fg_ansi_code(&self) -> &str {
-        match self {
-            ConsoleColor::Black => "\x1b[30m",
-            ConsoleColor::Red => "\x1b[31m",
-            ConsoleColor::Green => "\x1b[32m",
-            ConsoleColor::Yellow => "\x1b[33m",
-            ConsoleColor::Blue => "\x1b[34m",
-            ConsoleColor::Magenta => "\x1b[35m",
-            ConsoleColor::Cyan => "\x1b[36m",
-            ConsoleColor::White => "\x1b[37m",
-            ConsoleColor::BrightBlack => "\x1b[90m",
-            ConsoleColor::BrightRed => "\x1b[91m",
-            ConsoleColor::BrightGreen => "\x1b[92m",
-            ConsoleColor::BrightYellow => "\x1b[93m",
-            ConsoleColor::BrightBlue => "\x1b[94m",
-            ConsoleColor::BrightMagenta => "\x1b[95m",
-            ConsoleColor::BrightCyan => "\x1b[96m",
-            ConsoleColor::BrightWhite => "\x1b[97m",
-        }
-    }
-
-    pub fn to_bg_ansi_code(&self) -> &str {
-        match self {
-            ConsoleColor::Black => "\x1b[40m",
-            ConsoleColor::Red => "\x1b[41m",
-            ConsoleColor::Green => "\x1b[42m",
-            ConsoleColor::Yellow => "\x1b[43m",
-            ConsoleColor::Blue => "\x1b[44m",
-            ConsoleColor::Magenta => "\x1b[45m",
-            ConsoleColor::Cyan => "\x1b[46m",
-            ConsoleColor::White => "\x1b[47m",
-            ConsoleColor::BrightBlack => "\x1b[100m",
-            ConsoleColor::BrightRed => "\x1b[101m",
-            ConsoleColor::BrightGreen => "\x1b[102m",
-            ConsoleColor::BrightYellow => "\x1b[103m",
-            ConsoleColor::BrightBlue => "\x1b[104m",
-            ConsoleColor::BrightMagenta => "\x1b[105m",
-            ConsoleColor::BrightCyan => "\x1b[106m",
-            ConsoleColor::BrightWhite => "\x1b[107m",
-        }
-    }
-}
-
-pub struct BlockOptions {
-    name: Option<String>,
-    style: Option<StyleOptions>,
-    prefix: Option<String>,
-    padding: bool,
-    line_width: usize,
-    escape: bool,
-}
-
-impl Default for BlockOptions {
-    fn default() -> Self {
-        BlockOptions {
-            name: None,
-            style: None,
-            prefix: None,
-            padding: false,
-            line_width: 120,
-            escape: true,
-        }
-    }
-}
-
-pub struct StyleOptions {
-    foreground: Option<ConsoleColor>,
-    background: Option<ConsoleColor>,
-}
-
-struct Table<'a> {
-    headers: Vec<&'a str>,
-    rows: Vec<Vec<&'a str>>,
-    column_widths: Vec<usize>,
-}
-
-impl<'a> Table<'a> {
-    pub fn new(headers: Vec<&'a str>, rows: Vec<Vec<&'a str>>) -> Table<'a> {
-        let mut column_widths: Vec<usize> = vec![0; headers.len()];
-
-        for (index, header) in headers.iter().enumerate() {
-            let header_len = header.len();
-            if header.len() > column_widths[index] {
-                column_widths[index] = header.len();
-            }
-
-            for (j, cell) in rows[index].iter().enumerate() {
-                if cell.len() > column_widths[index] {
-                    column_widths[index] = cell.len();
-                }
-            }
-        }
-
-        Table {
-            headers,
-            rows,
-            column_widths,
-        }
-    }
-
-    fn create_line(&self, filler: char) -> String {
-        self.column_widths
-            .iter()
-            .map(|&len| filler.to_string().repeat(len + 2))
-            .collect::<Vec<_>>()
-            .join(" ")
-    }
-
-    fn print_table(&self) {
-        let border_line = self.create_line('-');
-        println!("{}", border_line);
-
-        // Print headers
-        let header_str = self
-            .headers
-            .iter()
-            .enumerate()
-            .map(|(i, header)| {
-                format!(
-                    " {}{}{} ",
-                    ConsoleColor::Green.to_fg_ansi_code(),
-                    header,
-                    " ".repeat(self.column_widths[i].saturating_sub(header.len()))
-                )
-            })
-            .collect::<Vec<_>>()
-            .join(" ")
-            + CLEAR_COLOR;
-        println!("{}", header_str);
-
-        println!("{}", border_line);
-
-        // Print rows
-        for row in &self.rows {
-            let row_str = row
-                .iter()
-                .enumerate()
-                .map(|(i, cell)| {
-                    format!(
-                        " {}{} ",
-                        cell,
-                        " ".repeat(self.column_widths[i].saturating_sub(cell.len()))
-                    )
-                })
-                .collect::<Vec<_>>()
-                .join(" ")
-                + CLEAR_COLOR;
-            println!("{}", row_str);
-        }
-
-        println!("{}", border_line);
-    }
-}
 
 const CLEAR_COLOR: &str = "\x1b[0m";
 

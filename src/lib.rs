@@ -3,14 +3,11 @@ pub mod console_color;
 pub mod style_options;
 pub mod table;
 
-use crossterm::{
-    event::{read, Event, KeyCode},
-    execute,
-    terminal::{disable_raw_mode, enable_raw_mode},
-    ExecutableCommand,
-};
+use crossterm::{event, event::{read, Event, KeyCode}, execute, terminal::{disable_raw_mode, enable_raw_mode}, ExecutableCommand};
 use std::io;
-use std::io::{Read, Write};
+use std::io::{stdout, Read, Write};
+use std::ptr::write;
+use std::time::Duration;
 use crossterm::style::{Color, Colors};
 use crate::block_options::BlockOptions;
 use crate::console_color::ConsoleColor;
@@ -356,5 +353,104 @@ impl RusticPrint {
         let padding = " ".repeat(padding);
 
         format!("{}{}", padding, message)
+    }
+
+    pub fn ask(&self, question: &str, default: Option<&str>, validator: Option<Box<dyn Fn(&str) -> Result<(), String>>>,
+    )
+        -> String
+    {
+        let mut stdout = io::stdout();
+
+        loop {
+            Self::ask_question(question, default);
+            stdout.flush().expect("Failed to flush stdout");
+
+            let mut input = String::new();
+
+            // Read user input
+            let mut input = String::new();
+            io::stdin().read_line(&mut input).expect("Failed to read line");
+
+            let input = input.trim();
+
+            // Use default value if input is empty
+            let answer = if input.is_empty() {
+                default.unwrap_or("").to_string()
+            } else {
+                input.to_string()
+            };
+
+            // Validate the input
+            if let Some(ref validate) = validator {
+                match validate(&answer) {
+                    Ok(_) => return answer,
+                    Err(err) => {
+                        println!("\x1b[31m{}\x1b[0m", err); // Red color for error messages
+                    }
+                }
+            } else {
+                return answer;
+            }
+        }
+    }
+
+    fn ask_question(question: &str, default_text: Option<&str>) {
+        let default_text = if let Some(default_text) = default_text {
+            format!(" [{}]", default_text)
+        } else {
+            String::new()
+        };
+
+        print!(
+            "{}{}{}:{}\n> ",
+            "\x1b[32m", // Green for the question
+            question,
+            default_text,
+            "\x1b[0m", // Reset color for the default
+        );
+    }
+
+    fn choose(question: &str, choices: &[&str]) -> String {
+        let mut stdout = io::stdout();
+        let mut selected: usize = 0;
+
+        print_choices(choices, selected);
+
+        loop {
+            // crossterm’s `poll` checks if an event is ready without blocking forever
+            if event::poll(Duration::from_millis(50)).unwrap() {
+                if let Event::Key(key_event) = event::read().unwrap() {
+                    match key_event.code {
+                        KeyCode::Up => {
+                            // Move selection up (with wrap-around)
+                            if selected == 0 {
+                                selected = choices.len() - 1;
+                            } else {
+                                selected -= 1;
+                            }
+                            // Print the list again on new lines
+                            print_choices(choices, selected);
+                        }
+                        KeyCode::Down => {
+                            // Move selection down (with wrap-around)
+                            selected = (selected + 1) % choices.len();
+                            // Print the list again on new lines
+                            print_choices(choices, selected);
+                        }
+                        KeyCode::Enter => {
+                            // Finalize the selection
+                            disable_raw_mode().unwrap();
+                            return choices[selected].to_string();
+                        }
+                        KeyCode::Esc => {
+                            // Optional: handle ESC as a “cancel”
+                            disable_raw_mode().unwrap();
+                            return String::new();
+                        }
+                        _ => {}
+                    }
+                }
+            }
+        }
     }
 }

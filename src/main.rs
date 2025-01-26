@@ -4,6 +4,8 @@ use rustic_print::RusticPrint;
 fn main() {
     let rustic_print = RusticPrint::new();
 
+    rustic_print.info("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
+
     rustic_print.block("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor. Ut tortor pretium viverra suspendisse. Nam at lectus urna duis convallis convallis tellus id. Mattis aliquam faucibus purus in massa tempor nec feugiat nisl. Condimentum vitae sapien pellentesque habitant. Lorem ipsum dolor sit amet consectetur. Commodo odio aenean sed adipiscing. Venenatis a condimentum vitae sapien pellentesque. Pellentesque elit ullamcorper dignissim cras tincidunt lobortis feugiat. Ut porttitor leo a diam sollicitudin tempor id eu nisl. Platea dictumst quisque sagittis purus sit amet volutpat. Egestas erat imperdiet sed euismod. Erat velit scelerisque in dictum non. Nec dui nunc mattis enim ut tellus elementum sagittis. Elementum facilisis leo vel fringilla.");
 
     rustic_print.title("Lorem ipsum dolor sit amet.");
@@ -17,6 +19,33 @@ fn main() {
             "Sit",
             "Amet"
     ]);
+
+    // let answer = rustic_print.ask(
+    //     "What is your name?",
+    //     None,
+    //     None,
+    // );
+    //
+    // let answer2 = rustic_print.ask(
+    //     "What is your name?",
+    //     Some("John Doe"),
+    //     None,
+    // );
+    //
+    // let validated_answer = rustic_print.ask(
+    //     "Enter a number:",
+    //     Some("42"),
+    //     Some(Box::new(|input| {
+    //         input.parse::<i32>().map_err(|_| "Please enter a valid number.".to_string())?;
+    //         Ok(())
+    //     })),
+    // );
+
+    // println!("You entered: {}", answer);
+    // println!("You entered2: {}", answer2);
+    // println!("You entered3: {}", validated_answer);
+
+
 
     //     $style->text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
     // //

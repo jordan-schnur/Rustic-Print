@@ -14,3 +14,5 @@ categories = ["command-line-interface", "text-processing", "development-tools", 
 
 [dependencies]
 crossterm = "0.28.1"
+textwrap = "0.16.1"
+unicode-width = "0.2.0"

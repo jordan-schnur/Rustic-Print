@@ -1,87 +1,88 @@
-use crossterm::style::style;
 use rustic_print::RusticPrint;
 
 fn main() {
     let rustic_print = RusticPrint::new();
 
-    rustic_print.info("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
+    // 1. info: A simple informational message.
+    // rustic_print.info("This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    //     rustic_print.info_multiple(vec!["This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "potato"]);
 
-    rustic_print.block("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor. Ut tortor pretium viverra suspendisse. Nam at lectus urna duis convallis convallis tellus id. Mattis aliquam faucibus purus in massa tempor nec feugiat nisl. Condimentum vitae sapien pellentesque habitant. Lorem ipsum dolor sit amet consectetur. Commodo odio aenean sed adipiscing. Venenatis a condimentum vitae sapien pellentesque. Pellentesque elit ullamcorper dignissim cras tincidunt lobortis feugiat. Ut porttitor leo a diam sollicitudin tempor id eu nisl. Platea dictumst quisque sagittis purus sit amet volutpat. Egestas erat imperdiet sed euismod. Erat velit scelerisque in dictum non. Nec dui nunc mattis enim ut tellus elementum sagittis. Elementum facilisis leo vel fringilla.");
+    rustic_print.success("This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
 
-    rustic_print.title("Lorem ipsum dolor sit amet.");
-
-    rustic_print.section("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
-
-    rustic_print.listing(vec![
-            "Lorem",
-            "Ipsum",
-            "Dolor",
-            "Sit",
-            "Amet"
-    ]);
-
-    // let answer = rustic_print.ask(
-    //     "What is your name?",
-    //     None,
-    //     None,
+    // 2. block: Uses default block options.
+    // rustic_print.block("This is a block message. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+    //
+    // // 3. title: Displays a title with an underline.
+    // rustic_print.title("Title Example");
+    //
+    // // 4. section: Displays a section header with a dashed underline.
+    // rustic_print.section("Section Example: Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    //
+    // // 5. listing: Shows a bullet list.
+    // rustic_print.listing(vec!["Item 1", "Item 2", "Item 3", "Item 4"]);
+    //
+    // // 6. text: Prints plain text with extra padding lines.
+    // rustic_print.text("This is a plain text message with extra padding.");
+    //
+    // // 7. comment: Prints a comment-styled block.
+    // rustic_print.comment("This is a comment message.");
+    //
+    // // 8. success: Prints a success-styled block.
+    // rustic_print.success("Operation completed successfully!");
+    //
+    // // 9. error: Prints an error-styled block.
+    // rustic_print.error("An error has occurred.");
+    //
+    // // 10. warning: Prints a warning-styled block.
+    // rustic_print.warning("This is a warning message.");
+    //
+    // // 11. note: Prints a note-styled block.
+    // rustic_print.note("This is a note message.");
+    //
+    // // 12. caution: Prints a caution-styled block.
+    // rustic_print.caution("This is a caution message.");
+    //
+    // // 13. table: Displays a table with headers and multiple rows.
+    // rustic_print.table(
+    //     vec!["Header 1", "Header 2", "Header 3"],
+    //     vec![
+    //         vec!["Cell 1", "Cell 2", "Cell 3"],
+    //         vec!["Data 1", "Data 2", "Data 3"],
+    //         vec!["Value 1", "Value 2", "Value 3"],
+    //     ],
     // );
     //
-    // let answer2 = rustic_print.ask(
-    //     "What is your name?",
-    //     Some("John Doe"),
-    //     None,
-    // );
+    // // 14. confirm: Prompts the user for a yes/no answer.
+    // let user_confirm = rustic_print.confirm("Do you want to continue?", true);
+    // println!("Confirm result: {}", user_confirm);
     //
-    // let validated_answer = rustic_print.ask(
-    //     "Enter a number:",
+    // // 15. ask (without validation): Asks a question with a default answer.
+    // let name = rustic_print.ask("What is your name?", Some("John Doe"), None);
+    // println!("Your name is: {}", name);
+    //
+    // // 16. ask (with validation): Asks for an integer value.
+    // let number = rustic_print.ask(
+    //     "Enter a valid integer:",
     //     Some("42"),
     //     Some(Box::new(|input| {
-    //         input.parse::<i32>().map_err(|_| "Please enter a valid number.".to_string())?;
+    //         input.parse::<i32>()
+    //             .map_err(|_| "Please enter a valid number.".to_string())?;
     //         Ok(())
     //     })),
     // );
-
-    // println!("You entered: {}", answer);
-    // println!("You entered2: {}", answer2);
-    // println!("You entered3: {}", validated_answer);
-
-
-
-    //     $style->text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
-    // //
-    //     $style->comment("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
-    // //
-    //     $style->success("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
-    // //
-    //     $style->error("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
-    // //
-    //     $style->warning("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
-    // //
-    //     $style->note("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
-    // //
-    //     $style->info("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
-    // //
-    //     $style->caution("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
-    // //
+    // println!("Validated integer: {}", number);
     //
-    // rustic_print.comment("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
-    //
-    // rustic_print.error("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
-    // rustic_print.warning("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
-    //
-    // rustic_print.info("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
-    //
-    // rustic_print.caution("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus at urna condimentum mattis pellentesque id nibh tortor.");
-    //
-    // let answer = rustic_print.confirm("Are you sure you want to continue?", true);
-    //
-    // println!("Answer: {:?}", answer);
-    // // $style->table(
-    // // 		            ['Header 1aggg1aggg1aggg', 'Header 2', 'Header 3'],
-    // // 		            [
-    // // 		                ['Cell 1', 'Cell 2', 'Cell 3'],
-    // // 		                ['Cell 1', 'Cell 2Cell 2Cell 2Cell 2Cell 2', 'Cell 3'],
-    // // 		                ['Cell 1', 'Cell 2', 'Cell 3'],
-    // // 		            ]
-    // // 		        );
+    // // 17. fancy_block: Direct call with custom block options.
+    // let custom_options = BlockOptions {
+    //     prefix: Some(">>".to_string()),
+    //     name: Some("FANCY".to_string()),
+    //     line_width: 60,
+    //     padding: true,
+    //     style: Some(StyleOptions {
+    //         foreground: Some(Color::Blue),
+    //         background: Some(Color::White),
+    //     }),
+    //     ..Default::default()  // fills in the missing field `escape`
+    // };
+    // rustic_print.fancy_block("This is a fancy block message with custom options.", custom_options);
 }

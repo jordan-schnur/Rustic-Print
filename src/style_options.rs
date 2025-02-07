@@ -1,7 +1,16 @@
-use crossterm::style::{Color, Colors};
-use crate::console_color::ConsoleColor;
+use crossterm::style::Color;
 
+#[derive(Debug, Clone)]
 pub struct StyleOptions {
-    pub(crate) foreground: Option<ConsoleColor>,
-    pub(crate) background: Option<ConsoleColor>,
+    pub foreground: Option<Color>,
+    pub background: Option<Color>,
+}
+
+impl Default for StyleOptions {
+    fn default() -> Self {
+        StyleOptions {
+            foreground: None,
+            background: None,
+        }
+    }
 }

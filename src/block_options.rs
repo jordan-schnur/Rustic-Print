@@ -1,23 +1,22 @@
-use crossterm::style::{Color, Colors};
+use crate::messages::Messages;
 use crate::style_options::StyleOptions;
 
+#[derive(Debug, Clone)]
 pub struct BlockOptions {
-    pub(crate) name: Option<String>,
-    pub(crate) style: Option<StyleOptions>,
-    pub(crate) prefix: Option<String>,
-    pub(crate) padding: bool,
-    pub(crate) line_width: usize,
-    pub(crate) escape: bool,
+    pub block_type: Option<String>,
+    pub style: Option<StyleOptions>,
+    pub prefix: String,
+    pub padding: bool,
+    pub escape: bool,
 }
 
 impl Default for BlockOptions {
     fn default() -> Self {
         BlockOptions {
-            name: None,
+            block_type: None,
             style: None,
-            prefix: None,
+            prefix: " ".to_string(),
             padding: false,
-            line_width: 120,
             escape: true,
         }
     }

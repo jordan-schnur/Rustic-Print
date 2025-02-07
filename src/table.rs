@@ -1,5 +1,4 @@
-use crate::CLEAR_COLOR;
-use crate::console_color::ConsoleColor;
+use crossterm::style::{style, Stylize};
 
 pub struct Table<'a> {
     headers: Vec<&'a str>,
@@ -9,17 +8,14 @@ pub struct Table<'a> {
 
 impl<'a> Table<'a> {
     pub fn new(headers: Vec<&'a str>, rows: Vec<Vec<&'a str>>) -> Table<'a> {
-        let mut column_widths: Vec<usize> = vec![0; headers.len()];
+        // Initialize each column width to the header length.
+        let mut column_widths: Vec<usize> = headers.iter().map(|h| h.len()).collect();
 
-        for (index, header) in headers.iter().enumerate() {
-            let header_len = header.len();
-            if header.len() > column_widths[index] {
-                column_widths[index] = header.len();
-            }
-
-            for (j, cell) in rows[index].iter().enumerate() {
-                if cell.len() > column_widths[index] {
-                    column_widths[index] = cell.len();
+        // Update widths based on row cell lengths.
+        for row in &rows {
+            for (i, cell) in row.iter().enumerate() {
+                if cell.len() > column_widths[i] {
+                    column_widths[i] = cell.len();
                 }
             }
         }
@@ -31,6 +27,7 @@ impl<'a> Table<'a> {
         }
     }
 
+    /// Creates a horizontal line based on the widths of each column.
     pub fn create_line(&self, filler: char) -> String {
         self.column_widths
             .iter()
@@ -39,32 +36,30 @@ impl<'a> Table<'a> {
             .join(" ")
     }
 
+    /// Prints the table with styled headers.
     pub fn print_table(&self) {
         let border_line = self.create_line('-');
         println!("{}", border_line);
 
-        // Print headers
+        // Print headers in green and bold.
         let header_str = self
             .headers
             .iter()
             .enumerate()
             .map(|(i, header)| {
                 format!(
-                    " {}{}{} ",
-                    ConsoleColor::Green.to_fg_ansi_code(),
-                    header,
+                    " {}{} ",
+                    header.green().bold(),
                     " ".repeat(self.column_widths[i].saturating_sub(header.len()))
                 )
             })
             .collect::<Vec<_>>()
-            .join(" ")
-            + CLEAR_COLOR;
+            .join(" ");
         println!("{}", header_str);
-
 
         println!("{}", border_line);
 
-        // Print rows
+        // Print rows.
         for row in &self.rows {
             let row_str = row
                 .iter()
@@ -77,8 +72,7 @@ impl<'a> Table<'a> {
                     )
                 })
                 .collect::<Vec<_>>()
-                .join(" ")
-                + CLEAR_COLOR;
+                .join(" ");
             println!("{}", row_str);
         }
 

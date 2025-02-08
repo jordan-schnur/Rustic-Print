@@ -6,6 +6,11 @@ pub struct StyleOptions {
     pub background: Option<Color>,
 }
 
+/// Returns a new `StyleOptions` instance with no foreground or background colors set.
+///
+/// # Returns
+///
+/// A `StyleOptions` instance with both `foreground` and `background` set to `None`.
 impl Default for StyleOptions {
     fn default() -> Self {
         StyleOptions {

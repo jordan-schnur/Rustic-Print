@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use crossterm::style::{style, Stylize};
 
 pub struct Table<'a> {
@@ -7,6 +8,18 @@ pub struct Table<'a> {
 }
 
 impl<'a> Table<'a> {
+    /// Creates a new `Table` instance with the given headers and rows.
+    ///
+    /// It calculates the column widths based on the maximum length of header and cell contents.
+    ///
+    /// # Arguments
+    ///
+    /// * `headers` - A vector of string slices representing the table headers.
+    /// * `rows` - A vector of rows, where each row is a vector of string slices.
+    ///
+    /// # Returns
+    ///
+    /// A new instance of `Table`.
     pub fn new(headers: Vec<&'a str>, rows: Vec<Vec<&'a str>>) -> Table<'a> {
         // Initialize each column width to the header length.
         let mut column_widths: Vec<usize> = headers.iter().map(|h| h.len()).collect();
@@ -28,6 +41,14 @@ impl<'a> Table<'a> {
     }
 
     /// Creates a horizontal line based on the widths of each column.
+    ///
+    /// # Arguments
+    ///
+    /// * `filler` - The character to repeat for the line.
+    ///
+    /// # Returns
+    ///
+    /// A `String` representing the horizontal line.
     pub fn create_line(&self, filler: char) -> String {
         self.column_widths
             .iter()
@@ -36,7 +57,7 @@ impl<'a> Table<'a> {
             .join(" ")
     }
 
-    /// Prints the table with styled headers.
+    /// Prints the table to stdout with styled headers and borders.
     pub fn print_table(&self) {
         let border_line = self.create_line('-');
         println!("{}", border_line);

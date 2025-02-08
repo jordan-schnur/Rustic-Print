@@ -9,6 +9,15 @@ pub struct BlockOptions {
     pub padding: bool,
 }
 
+/// Returns a default instance of `BlockOptions`.
+///
+/// # Returns
+///
+/// A `BlockOptions` instance with:
+/// - `block_type`: `None`
+/// - `style`: `None`
+/// - `prefix`: an empty string
+/// - `padding`: `false`
 impl Default for BlockOptions {
     fn default() -> Self {
         BlockOptions {

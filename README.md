@@ -1,28 +1,21 @@
 [![Rust](https://github.com/jordan-schnur/Rustic-Print/actions/workflows/.rust.yml/badge.svg)](https://github.com/jordan-schnur/Rustic-Print/actions/workflows/.rust.yml)
 # Rustic Print
 
-## Overview
-
-`rustic_print` is a versatile Rust library for enhancing console output. It offers a range of features to create a more
-engaging and informative command-line interface.
+Rustic Print is a lightweight, versatile Rust library for enhancing terminal output. It simplifies the process of rendering styled text blocks, interactive prompts, and tables—ideal for building engaging and informative command‐line interfaces.
 
 ## Features
 
-- **Colorful Output**: Support for various console colors.
-- **Formatted Blocks**: Create blocks of text with customizable styles and padding.
-- **Tables**: Generate tables with adjustable column widths.
-- **Message Types**: Special formats for different types of messages like success, error, warning, etc.
+- **Styled Text Blocks**: Create customizable blocks with color, padding, and custom prefixes.
+- **Message Types**: Easily display success, error, warning, caution, info, comment, note, and more.
+- **Tables**: Generate tables with auto-calculated column widths for neat, aligned output.
+- **Interactive Prompts**: Built-in functions for confirmations, input with validation, and interactive choice selection.
+- **Automatic Text Wrapping**: Dynamically wraps text to fit terminal width with proper indentations.
+- **Flexible API**: Accepts both single strings and vectors of strings to handle one-liners or multi-line messages.
 
 ## Installation
 
-To use `rustic_print` in your Rust project, add it to your `Cargo.toml`:
+Add Rustic Print to your project's `Cargo.toml`:
 
 ```toml
 [dependencies]
-rustic_print = "0.1.0"
-```
-
-## To Do
-
-- [ ] Add progress bar support.
-- [ ] Add more interactive elements.
+rustic_print = "0.2.0"

@@ -15,7 +15,7 @@ impl Default for BlockOptions {
             block_type: None,
             style: None,
             prefix: "".to_string(),
-            padding: false
+            padding: false,
         }
     }
 }

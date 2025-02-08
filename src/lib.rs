@@ -1,22 +1,29 @@
 pub mod block_options;
+mod messages;
 pub mod style_options;
 pub mod table;
-mod messages;
 
-use std::cmp::min;
-use crossterm::{event, event::{read, Event, KeyCode}, execute, queue, style::{Color, Stylize, SetForegroundColor, SetBackgroundColor, ResetColor}, terminal, terminal::{disable_raw_mode, enable_raw_mode}, ExecutableCommand, QueueableCommand};
-use std::io::{self, stdout, Read, Write};
-use std::time::Duration;
-use crossterm::cursor::MoveTo;
-use crossterm::style::{style, Attribute, Print, PrintStyledContent, SetColors, StyledContent};
-use textwrap::{fill, wrap, Options};
-use crate::block_options::{BlockOptions};
+use crate::block_options::BlockOptions;
 use crate::messages::Messages;
 use crate::style_options::StyleOptions;
 use crate::table::Table;
+use crossterm::cursor::MoveTo;
+use crossterm::style::{style, Attribute, Print, PrintStyledContent, SetColors, StyledContent};
+use crossterm::{
+    event,
+    event::{read, Event, KeyCode},
+    execute, queue,
+    style::{Color, ResetColor, SetBackgroundColor, SetForegroundColor, Stylize},
+    terminal,
+    terminal::{disable_raw_mode, enable_raw_mode},
+    ExecutableCommand, QueueableCommand,
+};
+use std::cmp::min;
+use std::io::{self, stdout, Read, Write};
+use std::time::Duration;
+use textwrap::{fill, wrap, Options};
 
 pub struct RusticPrint {}
-
 
 // TODO: Add support for macros
 impl RusticPrint {
@@ -113,56 +120,56 @@ impl RusticPrint {
         Ok(())
     }
 
-//     /// Prints a title in bold green with an underline.
-//     pub fn title(&self, message: &str) {
-//         let underline = "=".repeat(message.len());
-//         // Using the Stylize trait to add colors and bold style.
-//         let styled_text = format!(
-//             "\n{}\n{}",
-//             message.green().bold(),
-//             underline.green().bold()
-//         );
-//         println!("{}", styled_text);
-//     }
-//
-//     /// Prints a section header in bold green with a dashed underline.
-//     pub fn section(&self, message: &str) {
-//         let underline = "-".repeat(message.len());
-//         let styled_text = format!(
-//             "\n{}\n{}",
-//             message.green().bold(),
-//             underline.green().bold()
-//         );
-//         println!("{}", styled_text);
-//     }
-//
-//     /// Prints a list of elements with a bullet.
-//     pub fn listing(&self, elements: Vec<&str>) {
-//         let mut styled_text = String::from("\n");
-//         for element in elements {
-//             let element = element.trim();
-//             let list_element = format!("* {}", element);
-//             styled_text.push_str(&format!("{}\n", self.format_with_padding(&list_element, 1)));
-//         }
-//         print!("{}", styled_text);
-//     }
-//
-//     /// Prints plain text with a blank line before and after.
-//     pub fn text(&self, message: &str) {
-//         print!("{}", self.format_with_padding_lines(&self.format_with_padding(message, 1)));
-//     }
-//
-//     /// Prints a comment-styled block.
-//     pub fn comment(&self, message: &str) {
-//         self.fancy_block(
-//             message,
-//             BlockOptions {
-//                 prefix: Some(" //".to_string()),
-//                 ..Default::default()
-//             },
-//         );
-//     }
-//
+    //     /// Prints a title in bold green with an underline.
+    //     pub fn title(&self, message: &str) {
+    //         let underline = "=".repeat(message.len());
+    //         // Using the Stylize trait to add colors and bold style.
+    //         let styled_text = format!(
+    //             "\n{}\n{}",
+    //             message.green().bold(),
+    //             underline.green().bold()
+    //         );
+    //         println!("{}", styled_text);
+    //     }
+    //
+    //     /// Prints a section header in bold green with a dashed underline.
+    //     pub fn section(&self, message: &str) {
+    //         let underline = "-".repeat(message.len());
+    //         let styled_text = format!(
+    //             "\n{}\n{}",
+    //             message.green().bold(),
+    //             underline.green().bold()
+    //         );
+    //         println!("{}", styled_text);
+    //     }
+    //
+    //     /// Prints a list of elements with a bullet.
+    //     pub fn listing(&self, elements: Vec<&str>) {
+    //         let mut styled_text = String::from("\n");
+    //         for element in elements {
+    //             let element = element.trim();
+    //             let list_element = format!("* {}", element);
+    //             styled_text.push_str(&format!("{}\n", self.format_with_padding(&list_element, 1)));
+    //         }
+    //         print!("{}", styled_text);
+    //     }
+    //
+    //     /// Prints plain text with a blank line before and after.
+    //     pub fn text(&self, message: &str) {
+    //         print!("{}", self.format_with_padding_lines(&self.format_with_padding(message, 1)));
+    //     }
+    //
+    //     /// Prints a comment-styled block.
+    //     pub fn comment(&self, message: &str) {
+    //         self.fancy_block(
+    //             message,
+    //             BlockOptions {
+    //                 prefix: Some(" //".to_string()),
+    //                 ..Default::default()
+    //             },
+    //         );
+    //     }
+    //
 
     pub fn success_multiple(&self, messages: Vec<&str>) {
         self.fancy_block(
@@ -176,7 +183,8 @@ impl RusticPrint {
                 padding: true,
                 ..Default::default()
             },
-        ).expect("Failed to print success block");
+        )
+        .expect("Failed to print success block");
     }
 
     /// Prints a success block with black text on a green background.
@@ -192,11 +200,14 @@ impl RusticPrint {
                 padding: true,
                 ..Default::default()
             },
-        ).expect("Failed to print success block");
+        )
+        .expect("Failed to print success block");
     }
 
     pub fn caution<T>(&self, messages: T)
-    where T: Into<Messages>{
+    where
+        T: Into<Messages>,
+    {
         self.fancy_block(
             messages,
             BlockOptions {
@@ -209,11 +220,14 @@ impl RusticPrint {
                 padding: true,
                 ..Default::default()
             },
-        ).expect("Failed to print caution block");
+        )
+        .expect("Failed to print caution block");
     }
 
     pub fn error<T>(&self, messages: T)
-    where T: Into<Messages>{
+    where
+        T: Into<Messages>,
+    {
         self.fancy_block(
             messages,
             BlockOptions {
@@ -226,22 +240,28 @@ impl RusticPrint {
                 padding: true,
                 ..Default::default()
             },
-        ).expect("Failed to print error block");
+        )
+        .expect("Failed to print error block");
     }
 
     pub fn comment<T>(&self, messages: T)
-    where T: Into<Messages>{
+    where
+        T: Into<Messages>,
+    {
         self.fancy_block(
             messages,
             BlockOptions {
                 prefix: " // ".to_string(),
                 ..Default::default()
             },
-        ).expect("Failed to print comment block");
+        )
+        .expect("Failed to print comment block");
     }
 
     pub fn warning<T>(&self, messages: T)
-    where T: Into<Messages>{
+    where
+        T: Into<Messages>,
+    {
         self.fancy_block(
             messages,
             BlockOptions {
@@ -253,45 +273,45 @@ impl RusticPrint {
                 padding: true,
                 ..Default::default()
             },
-        ).expect("Failed to print comment block");
+        )
+        .expect("Failed to print comment block");
     }
 
-
-//
-//     /// Prints a warning block with black text on a yellow background.
-//     pub fn warning(&self, message: &str) {
-//         self.fancy_block(
-//             message,
-//             BlockOptions {
-//                 style: Some(StyleOptions {
-//                     foreground: Some(Color::Black),
-//                     background: Some(Color::Yellow),
-//                 }),
-//                 prefix: Some(" ".to_string()),
-//                 name: Some("WARNING".to_string()),
-//                 padding: true,
-//                 ..Default::default()
-//             },
-//         );
-//     }
-//
-//     /// Prints a note block with yellow text.
-//     pub fn note(&self, message: &str) {
-//         self.fancy_block(
-//             message,
-//             BlockOptions {
-//                 style: Some(StyleOptions {
-//                     foreground: Some(Color::Yellow),
-//                     background: None,
-//                 }),
-//                 prefix: Some(" ! ".to_string()),
-//                 name: Some("NOTE".to_string()),
-//                 padding: false,
-//                 ..Default::default()
-//             },
-//         );
-//     }
-//
+    //
+    //     /// Prints a warning block with black text on a yellow background.
+    //     pub fn warning(&self, message: &str) {
+    //         self.fancy_block(
+    //             message,
+    //             BlockOptions {
+    //                 style: Some(StyleOptions {
+    //                     foreground: Some(Color::Black),
+    //                     background: Some(Color::Yellow),
+    //                 }),
+    //                 prefix: Some(" ".to_string()),
+    //                 name: Some("WARNING".to_string()),
+    //                 padding: true,
+    //                 ..Default::default()
+    //             },
+    //         );
+    //     }
+    //
+    //     /// Prints a note block with yellow text.
+    //     pub fn note(&self, message: &str) {
+    //         self.fancy_block(
+    //             message,
+    //             BlockOptions {
+    //                 style: Some(StyleOptions {
+    //                     foreground: Some(Color::Yellow),
+    //                     background: None,
+    //                 }),
+    //                 prefix: Some(" ! ".to_string()),
+    //                 name: Some("NOTE".to_string()),
+    //                 padding: false,
+    //                 ..Default::default()
+    //             },
+    //         );
+    //     }
+    //
     pub fn info_multiple(&self, messages: Vec<&str>) {
         self.fancy_block(
             Messages::Multiple(messages.iter().map(|s| s.to_string()).collect()),
@@ -304,7 +324,8 @@ impl RusticPrint {
                 padding: true,
                 ..Default::default()
             },
-        ).expect("Failed to print info block");
+        )
+        .expect("Failed to print info block");
     }
 
     /// Prints an info block with yellow text.
@@ -320,190 +341,191 @@ impl RusticPrint {
                 padding: true,
                 ..Default::default()
             },
-        ).expect("Failed to print info block");
+        )
+        .expect("Failed to print info block");
     }
-//
-//     /// Prints a table.
-//     pub fn table(&self, headers: Vec<&str>, rows: Vec<Vec<&str>>) {
-//         let table = Table::new(headers, rows);
-//         table.print_table();
-//     }
-//
-//     /// Prompts the user for confirmation. Uses raw mode and crossterm styling.
-//     pub fn confirm(&self, question: &str, default: bool) -> bool {
-//         let mut stdout = io::stdout();
-//         enable_raw_mode().expect("Failed to enable raw mode");
-//
-//         let default_answer = if default { "yes" } else { "no" };
-//
-//         // Using the Stylize trait to color the prompt.
-//         print!(
-//             "{} (yes/no) [{}]:\r\n > ",
-//             question.green(),
-//             default_answer.yellow()
-//         );
-//         stdout.flush().expect("Failed to flush stdout");
-//
-//         let mut input = String::new();
-//
-//         loop {
-//             if let Event::Key(key_event) = read().expect("Failed to read event") {
-//                 match key_event.code {
-//                     KeyCode::Char(c) => {
-//                         print!("{}", c);
-//                         input.push(c);
-//                     }
-//                     KeyCode::Enter => {
-//                         println!();
-//                         break;
-//                     }
-//                     KeyCode::Backspace => {
-//                         if !input.is_empty() {
-//                             input.pop();
-//                             print!("\x08 \x08"); // Visual backspace.
-//                         }
-//                     }
-//                     _ => {}
-//                 }
-//                 stdout.flush().expect("Failed to flush stdout");
-//             }
-//         }
-//
-//         disable_raw_mode().expect("Failed to disable raw mode");
-//         println!();
-//
-//         if input.trim().is_empty() {
-//             default
-//         } else if input.trim().eq_ignore_ascii_case("yes")
-//             || input.trim().eq_ignore_ascii_case("y")
-//         {
-//             true
-//         } else {
-//             false
-//         }
-//     }
-//
-//     fn format_with_padding_lines(&self, message: &str) -> String {
-//         format!("\n{}\n", message)
-//     }
-//
-//     fn format_with_padding(&self, message: &str, padding: usize) -> String {
-//         format!("{}{}", " ".repeat(padding), message)
-//     }
-//
-//     /// Prompts the user with a question (and optional default/validator) and returns the answer.
-//     pub fn ask(
-//         &self,
-//         question: &str,
-//         default: Option<&str>,
-//         validator: Option<Box<dyn Fn(&str) -> Result<(), String>>>,
-//     ) -> String {
-//         let mut stdout = io::stdout();
-//
-//         loop {
-//             Self::ask_question(question, default);
-//             stdout.flush().expect("Failed to flush stdout");
-//
-//             let mut input = String::new();
-//             io::stdin().read_line(&mut input).expect("Failed to read line");
-//             let input = input.trim();
-//
-//             // Use the default value if the user provides no input.
-//             let answer = if input.is_empty() {
-//                 default.unwrap_or("").to_string()
-//             } else {
-//                 input.to_string()
-//             };
-//
-//             // Validate the answer if a validator was provided.
-//             if let Some(ref validate) = validator {
-//                 match validate(&answer) {
-//                     Ok(_) => return answer,
-//                     Err(err) => {
-//                         println!("{}", err.red());
-//                     }
-//                 }
-//             } else {
-//                 return answer;
-//             }
-//         }
-//     }
-//
-//     fn ask_question(question: &str, default_text: Option<&str>) {
-//         let default_text = if let Some(dt) = default_text {
-//             format!(" [{}]", dt)
-//         } else {
-//             String::new()
-//         };
-//
-//         print!("{}{}:\n> ", question.green(), default_text);
-//     }
-//
-//     /// Allows the user to choose an option from a list using the arrow keys.
-//     /// (Press Enter to select; Esc cancels.)
-//     fn choose(question: &str, choices: &[&str]) -> String {
-//         let stdout = io::stdout();
-//         let mut selected: usize = 0;
-//
-//         // Print the question.
-//         println!("{}", question.green().bold());
-//         print_choices(choices, selected);
-//
-//         loop {
-//             if event::poll(Duration::from_millis(50)).unwrap() {
-//                 if let Event::Key(key_event) = event::read().unwrap() {
-//                     match key_event.code {
-//                         KeyCode::Up => {
-//                             if selected == 0 {
-//                                 selected = choices.len() - 1;
-//                             } else {
-//                                 selected -= 1;
-//                             }
-//                             print_choices(choices, selected);
-//                         }
-//                         KeyCode::Down => {
-//                             selected = (selected + 1) % choices.len();
-//                             print_choices(choices, selected);
-//                         }
-//                         KeyCode::Enter => {
-//                             disable_raw_mode().unwrap();
-//                             return choices[selected].to_string();
-//                         }
-//                         KeyCode::Esc => {
-//                             disable_raw_mode().unwrap();
-//                             return String::new();
-//                         }
-//                         _ => {}
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//
-//     /// Helper: Prints a single line using the given foreground and background colors.
-//     fn print_styled_line(&self, line: &str, fg: Option<Color>, bg: Option<Color>) {
-//         let styled_line = match (fg, bg) {
-//             (Some(f), Some(b)) => line.with(f).on(b),
-//             (Some(f), None) => line.with(f),
-//             (None, Some(b)) => line.on(b),
-//             (None, None) => style(line), // Instead of line.normal()
-//         };
-//         println!("{}", styled_line);
-//     }
-// }
-//
-// /// Helper function for the `choose` method: prints the choices with the current selection highlighted.
-// fn print_choices(choices: &[&str], selected: usize) {
-//     // For simplicity, reprint all choices.
-//     // The selected option is rendered with inverted colors.
-//     for (i, choice) in choices.iter().enumerate() {
-//         if i == selected {
-//             // For the selected option, use a black-on-white style.
-//             println!("{}", format!("> {}", choice).black().on_white());
-//         } else {
-//             println!("  {}", choice);
-//         }
-//     }
+    //
+    //     /// Prints a table.
+    //     pub fn table(&self, headers: Vec<&str>, rows: Vec<Vec<&str>>) {
+    //         let table = Table::new(headers, rows);
+    //         table.print_table();
+    //     }
+    //
+    //     /// Prompts the user for confirmation. Uses raw mode and crossterm styling.
+    //     pub fn confirm(&self, question: &str, default: bool) -> bool {
+    //         let mut stdout = io::stdout();
+    //         enable_raw_mode().expect("Failed to enable raw mode");
+    //
+    //         let default_answer = if default { "yes" } else { "no" };
+    //
+    //         // Using the Stylize trait to color the prompt.
+    //         print!(
+    //             "{} (yes/no) [{}]:\r\n > ",
+    //             question.green(),
+    //             default_answer.yellow()
+    //         );
+    //         stdout.flush().expect("Failed to flush stdout");
+    //
+    //         let mut input = String::new();
+    //
+    //         loop {
+    //             if let Event::Key(key_event) = read().expect("Failed to read event") {
+    //                 match key_event.code {
+    //                     KeyCode::Char(c) => {
+    //                         print!("{}", c);
+    //                         input.push(c);
+    //                     }
+    //                     KeyCode::Enter => {
+    //                         println!();
+    //                         break;
+    //                     }
+    //                     KeyCode::Backspace => {
+    //                         if !input.is_empty() {
+    //                             input.pop();
+    //                             print!("\x08 \x08"); // Visual backspace.
+    //                         }
+    //                     }
+    //                     _ => {}
+    //                 }
+    //                 stdout.flush().expect("Failed to flush stdout");
+    //             }
+    //         }
+    //
+    //         disable_raw_mode().expect("Failed to disable raw mode");
+    //         println!();
+    //
+    //         if input.trim().is_empty() {
+    //             default
+    //         } else if input.trim().eq_ignore_ascii_case("yes")
+    //             || input.trim().eq_ignore_ascii_case("y")
+    //         {
+    //             true
+    //         } else {
+    //             false
+    //         }
+    //     }
+    //
+    //     fn format_with_padding_lines(&self, message: &str) -> String {
+    //         format!("\n{}\n", message)
+    //     }
+    //
+    //     fn format_with_padding(&self, message: &str, padding: usize) -> String {
+    //         format!("{}{}", " ".repeat(padding), message)
+    //     }
+    //
+    //     /// Prompts the user with a question (and optional default/validator) and returns the answer.
+    //     pub fn ask(
+    //         &self,
+    //         question: &str,
+    //         default: Option<&str>,
+    //         validator: Option<Box<dyn Fn(&str) -> Result<(), String>>>,
+    //     ) -> String {
+    //         let mut stdout = io::stdout();
+    //
+    //         loop {
+    //             Self::ask_question(question, default);
+    //             stdout.flush().expect("Failed to flush stdout");
+    //
+    //             let mut input = String::new();
+    //             io::stdin().read_line(&mut input).expect("Failed to read line");
+    //             let input = input.trim();
+    //
+    //             // Use the default value if the user provides no input.
+    //             let answer = if input.is_empty() {
+    //                 default.unwrap_or("").to_string()
+    //             } else {
+    //                 input.to_string()
+    //             };
+    //
+    //             // Validate the answer if a validator was provided.
+    //             if let Some(ref validate) = validator {
+    //                 match validate(&answer) {
+    //                     Ok(_) => return answer,
+    //                     Err(err) => {
+    //                         println!("{}", err.red());
+    //                     }
+    //                 }
+    //             } else {
+    //                 return answer;
+    //             }
+    //         }
+    //     }
+    //
+    //     fn ask_question(question: &str, default_text: Option<&str>) {
+    //         let default_text = if let Some(dt) = default_text {
+    //             format!(" [{}]", dt)
+    //         } else {
+    //             String::new()
+    //         };
+    //
+    //         print!("{}{}:\n> ", question.green(), default_text);
+    //     }
+    //
+    //     /// Allows the user to choose an option from a list using the arrow keys.
+    //     /// (Press Enter to select; Esc cancels.)
+    //     fn choose(question: &str, choices: &[&str]) -> String {
+    //         let stdout = io::stdout();
+    //         let mut selected: usize = 0;
+    //
+    //         // Print the question.
+    //         println!("{}", question.green().bold());
+    //         print_choices(choices, selected);
+    //
+    //         loop {
+    //             if event::poll(Duration::from_millis(50)).unwrap() {
+    //                 if let Event::Key(key_event) = event::read().unwrap() {
+    //                     match key_event.code {
+    //                         KeyCode::Up => {
+    //                             if selected == 0 {
+    //                                 selected = choices.len() - 1;
+    //                             } else {
+    //                                 selected -= 1;
+    //                             }
+    //                             print_choices(choices, selected);
+    //                         }
+    //                         KeyCode::Down => {
+    //                             selected = (selected + 1) % choices.len();
+    //                             print_choices(choices, selected);
+    //                         }
+    //                         KeyCode::Enter => {
+    //                             disable_raw_mode().unwrap();
+    //                             return choices[selected].to_string();
+    //                         }
+    //                         KeyCode::Esc => {
+    //                             disable_raw_mode().unwrap();
+    //                             return String::new();
+    //                         }
+    //                         _ => {}
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    //
+    //     /// Helper: Prints a single line using the given foreground and background colors.
+    //     fn print_styled_line(&self, line: &str, fg: Option<Color>, bg: Option<Color>) {
+    //         let styled_line = match (fg, bg) {
+    //             (Some(f), Some(b)) => line.with(f).on(b),
+    //             (Some(f), None) => line.with(f),
+    //             (None, Some(b)) => line.on(b),
+    //             (None, None) => style(line), // Instead of line.normal()
+    //         };
+    //         println!("{}", styled_line);
+    //     }
+    // }
+    //
+    // /// Helper function for the `choose` method: prints the choices with the current selection highlighted.
+    // fn print_choices(choices: &[&str], selected: usize) {
+    //     // For simplicity, reprint all choices.
+    //     // The selected option is rendered with inverted colors.
+    //     for (i, choice) in choices.iter().enumerate() {
+    //         if i == selected {
+    //             // For the selected option, use a black-on-white style.
+    //             println!("{}", format!("> {}", choice).black().on_white());
+    //         } else {
+    //             println!("  {}", choice);
+    //         }
+    //     }
 }
 
 /// Prints a styled padding line that includes the provided prefix.
@@ -544,7 +566,12 @@ fn print_padding_line(
             styled_line = styled_line.with(fg);
         }
 
-        queue!(stdout, PrintStyledContent(styled_line), ResetColor, Print("\r\n"))?;
+        queue!(
+            stdout,
+            PrintStyledContent(styled_line),
+            ResetColor,
+            Print("\r\n")
+        )?;
         return Ok(());
     }
     queue!(stdout, Print(line), Print("\r\n"))?;

@@ -7,7 +7,6 @@ pub struct BlockOptions {
     pub style: Option<StyleOptions>,
     pub prefix: String,
     pub padding: bool,
-    pub escape: bool,
 }
 
 impl Default for BlockOptions {
@@ -16,8 +15,7 @@ impl Default for BlockOptions {
             block_type: None,
             style: None,
             prefix: "".to_string(),
-            padding: false,
-            escape: true,
+            padding: false
         }
     }
 }

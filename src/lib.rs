@@ -3,10 +3,12 @@ pub mod style_options;
 pub mod table;
 mod messages;
 
-use crossterm::{event, event::{read, Event, KeyCode}, execute, style::{Color, Stylize, SetForegroundColor, SetBackgroundColor, ResetColor}, terminal, terminal::{disable_raw_mode, enable_raw_mode}, ExecutableCommand};
+use std::cmp::min;
+use crossterm::{event, event::{read, Event, KeyCode}, execute, queue, style::{Color, Stylize, SetForegroundColor, SetBackgroundColor, ResetColor}, terminal, terminal::{disable_raw_mode, enable_raw_mode}, ExecutableCommand, QueueableCommand};
 use std::io::{self, stdout, Read, Write};
 use std::time::Duration;
-use crossterm::style::style;
+use crossterm::cursor::MoveTo;
+use crossterm::style::{style, Attribute, Print, PrintStyledContent, SetColors, StyledContent};
 use textwrap::{fill, wrap, Options};
 use crate::block_options::{BlockOptions};
 use crate::messages::Messages;
@@ -15,6 +17,8 @@ use crate::table::Table;
 
 pub struct RusticPrint {}
 
+
+// TODO: Add support for macros
 impl RusticPrint {
     pub fn new() -> RusticPrint {
         RusticPrint {}
@@ -26,98 +30,171 @@ impl RusticPrint {
     //     self.fancy_block(message, block_options);
     // }
 
-    pub fn fancy_block(&self, message: Messages, block_options: BlockOptions) {
+    pub fn fancy_block<T>(&self, message: T, block_options: BlockOptions)
+        -> Result<(), Box<dyn std::error::Error>>
+    where T: Into<Messages>{
+        let message = message.into();
+
         let mut stdout = stdout();
 
-        // Determine terminal and wrap width.
         let term_width = terminal::size().unwrap_or((120, 0)).0 as usize;
         let mut wrap_width = if term_width > 120 { 120 } else { term_width };
         if cfg!(windows) {
             wrap_width = wrap_width.saturating_sub(1);
         }
 
-        // Build the indents.
-        // Only on the very first line we show the block type (if any).
-        let prefix = block_options.prefix;
-        let first_line_indent = if let Some(ref bt) = block_options.block_type {
-            format!("{}[{}] ", prefix, bt.to_uppercase())
-        } else {
-            prefix.clone()
-        };
-        let continuation_indent = " ".repeat(first_line_indent.len());
+        let has_block_type = block_options.block_type.is_some();
+        let default_block_type = "".to_string();
+        let block_type = block_options.block_type.unwrap_or("".to_string());
+        let block_length = block_type.clone().len();
+        // Text starts at prefix + block type + 5 for the two brackets and the space between them
+        let extra_space = if block_options.prefix.is_empty() { 2 } else { 2 };
+        let text_start = block_options.prefix.len()
+            + block_length
+            + extra_space;
 
-        // Outer unformatted blank line above the block.
-        stdout.execute(ResetColor).unwrap();
-        println!();
+        queue!(stdout, Print("\n"))?;
 
-        // Apply styling for the block.
-        if let Some(ref style_opts) = block_options.style {
-            if let Some(fg) = style_opts.foreground {
-                stdout.execute(SetForegroundColor(fg)).unwrap();
-            }
-            if let Some(bg) = style_opts.background {
-                stdout.execute(SetBackgroundColor(bg)).unwrap();
-            }
-        }
-
-        // A helper to print a styled line that is padded with trailing spaces
-        // to fill the entire wrap_width.
-        let print_styled_line = |line: &str| {
-            let padded_line = format!("{:<width$}", line, width = wrap_width);
-            print!("{}", padded_line);
-            stdout.execute(ResetColor).unwrap();
-        };
-
-        // If padding is enabled, print one styled blank line inside the block before messages.
         if block_options.padding {
-            print_styled_line("");
-        }
-
-        // Closure to wrap and print a message.
-        let print_message = |msg: &str, initial_indent: &str, subsequent_indent: &str| {
-            let processed = if block_options.escape {
-                escape_text(msg)
+            if let Some(style) = &block_options.style {
+                if let Some(bg) = style.background {
+                    let padding_line = " ".repeat(wrap_width).on(bg);
+                    queue!(stdout, PrintStyledContent(padding_line), ResetColor, Print("\r\n"))?;
+                } else {
+                    queue!(stdout, Print("\n"))?;
+                }
             } else {
-                msg.to_string()
-            };
-            let options = Options::new(wrap_width)
-                .initial_indent(initial_indent)
-                .subsequent_indent(subsequent_indent);
-            // Use textwrap::wrap to get a Vec<String> (each line without trailing spaces)
-            let wrapped_lines = wrap(&processed, options);
-            for line in wrapped_lines {
-                print_styled_line(&line);
+                queue!(stdout, Print("\n"))?;
             }
-        };
+        }
 
-        // Print our messages.
+        // Build combined entire message string
+
         match message {
-            Messages::Single(ref msg) => {
-                print_message(msg, &first_line_indent, &continuation_indent);
-            }
-            Messages::Multiple(ref msgs) => {
-                if let Some(first_msg) = msgs.first() {
-                    print_message(first_msg, &first_line_indent, &continuation_indent);
+            Messages::Single(ref message) => {
+                let mut whole_message = message.clone();
+                let mut initial_indent = block_options.prefix.clone();
+                let mut prefix = block_options.prefix.clone();
+
+
+                if (initial_indent.is_empty()) {
+                    initial_indent = " ".to_string();
                 }
-                for msg in msgs.iter().skip(1) {
-                    // Blank styled line between messages.
-                    print_styled_line("");
-                    // For subsequent messages, use the continuation indent.
-                    print_message(msg, &continuation_indent, &continuation_indent);
+
+                if has_block_type {
+                    initial_indent = format!("{}[{}] ", initial_indent, block_type);
+                }
+
+                let initial_line_offset = initial_indent.len();
+                let subsequent_indent = format!("{}{}", prefix, " ".repeat(initial_line_offset - prefix.len()));
+                let options = Options::new(wrap_width)
+                    .initial_indent(&*initial_indent)
+                    .subsequent_indent(&*subsequent_indent);
+
+                fill(&whole_message, &options)
+                    .lines()
+                    .for_each(|line| {
+                        let line_len = line.clone().len();
+                        let end_padding_text = " ".repeat(wrap_width.saturating_sub(line.len()));
+
+                        let mut text = style(format!("{}{}", line, end_padding_text));
+                            if let Some(style) = &block_options.style {
+                                if let Some(bg) = style.background {
+                                    text = text.on(bg);
+                                }
+
+                                if let Some(fg) = style.foreground {
+                                    text = text.with(fg);
+                                }
+                            }
+
+                            queue!(stdout, PrintStyledContent(text), ResetColor, Print("\n")).unwrap();
+                    });
+            }
+            Messages::Multiple(ref messages) => {
+                let mut whole_message = message.clone();
+                let mut initial_indent = block_options.prefix.clone();
+                let mut prefix = block_options.prefix.clone();
+
+
+                if (initial_indent.is_empty()) {
+                    initial_indent = " ".to_string();
+                }
+
+                if has_block_type {
+                    initial_indent = format!("{}[{}] ", initial_indent, block_type);
+                }
+
+                let initial_line_offset = initial_indent.len();
+                let subsequent_indent = format!("{}{}", prefix, " ".repeat(initial_line_offset - prefix.len()));
+                let initial_options = Options::new(wrap_width)
+                    .initial_indent(&*initial_indent)
+                    .subsequent_indent(&*subsequent_indent);
+
+                let mut first_message = true;
+
+                for (i, message) in messages.iter().enumerate() {
+                    let mut options = initial_options.clone();
+                    if first_message {
+                        first_message = false;
+                    } else {
+                        if let Some(style) = &block_options.style {
+                            if let Some(bg) = style.background {
+                                let padding_line = " ".repeat(wrap_width).on(bg);
+                                queue!(stdout, PrintStyledContent(padding_line), ResetColor, Print("\r\n"))?;
+                            } else {
+                                queue!(stdout, Print("\n"))?;
+                            }
+                        } else {
+                            queue!(stdout, Print("\n"))?;
+                        }
+
+                        options = options.clone().initial_indent(&*subsequent_indent);
+                    }
+
+                    fill(&message, &options)
+                        .lines()
+                        .for_each(|line| {
+                            let line_len = line.clone().len();
+                            let end_padding_text = " ".repeat(wrap_width.saturating_sub(line.len()));
+
+                            let mut text = style(format!("{}{}", line, end_padding_text));
+                            if let Some(style) = &block_options.style {
+                                if let Some(bg) = style.background {
+                                    text = text.on(bg);
+                                }
+
+                                if let Some(fg) = style.foreground {
+                                    text = text.with(fg);
+                                }
+                            }
+
+                            queue!(stdout, PrintStyledContent(text), ResetColor, Print("\n")).unwrap();
+                        });
                 }
             }
         }
 
-        // If padding is enabled, print one styled blank line after messages.
         if block_options.padding {
-            print_styled_line("");
+            if let Some(style) = &block_options.style {
+                if let Some(bg) = style.background {
+                    let padding_line = " ".repeat(wrap_width).on(bg);
+                    queue!(stdout, PrintStyledContent(padding_line), ResetColor, Print("\r\n"))?;
+                } else {
+                    queue!(stdout, Print("\n"))?;
+                }
+            } else {
+                queue!(stdout, Print("\n"))?;
+            }
         }
 
-        // Reset styling.
-        stdout.execute(ResetColor).unwrap();
+        queue!(stdout, Print("\n"))?;
 
-        // Outer unformatted blank line after the block.
-        println!();
+
+        // Flush the queue to render the block in one go.
+        stdout.flush()?;
+
+        Ok(())
     }
 
 //     /// Prints a title in bold green with an underline.
@@ -170,6 +247,22 @@ impl RusticPrint {
 //         );
 //     }
 //
+
+    pub fn success_multiple(&self, messages: Vec<&str>) {
+        self.fancy_block(
+            Messages::Multiple(messages.iter().map(|s| s.to_string()).collect()),
+            BlockOptions {
+                style: Some(StyleOptions {
+                    foreground: Some(Color::Black),
+                    background: Some(Color::DarkGreen),
+                }),
+                block_type: Some("OK".to_string()),
+                padding: true,
+                ..Default::default()
+            },
+        ).expect("Failed to print success block");
+    }
+
     /// Prints a success block with black text on a green background.
     pub fn success(&self, message: &str) {
         self.fancy_block(
@@ -177,13 +270,29 @@ impl RusticPrint {
             BlockOptions {
                 style: Some(StyleOptions {
                     foreground: Some(Color::Black),
-                    background: Some(Color::Green),
+                    background: Some(Color::DarkGreen),
                 }),
                 block_type: Some("OK".to_string()),
                 padding: true,
                 ..Default::default()
             },
-        );
+        ).expect("Failed to print success block");
+    }
+
+    pub fn caution<T>(&self, messages: T)
+    where T: Into<Messages>{
+        self.fancy_block(
+            messages,
+            BlockOptions {
+                style: Some(StyleOptions {
+                    foreground: Some(Color::Black),
+                    background: Some(Color::DarkGreen),
+                }),
+                block_type: Some("OK".to_string()),
+                padding: true,
+                ..Default::default()
+            },
+        ).expect("Failed to print caution block");
     }
 //
 //     /// Prints an error block with white text on a red background.
@@ -249,7 +358,7 @@ impl RusticPrint {
                 padding: true,
                 ..Default::default()
             },
-        );
+        ).expect("Failed to print info block");
     }
 
     /// Prints an info block with yellow text.
@@ -265,25 +374,8 @@ impl RusticPrint {
                 padding: true,
                 ..Default::default()
             },
-        );
+        ).expect("Failed to print info block");
     }
-//
-//     /// Prints a caution block with white text on a red background.
-//     pub fn caution(&self, message: &str) {
-//         self.fancy_block(
-//             message,
-//             BlockOptions {
-//                 style: Some(StyleOptions {
-//                     foreground: Some(Color::White),
-//                     background: Some(Color::Red),
-//                 }),
-//                 prefix: Some(" ! ".to_string()),
-//                 name: Some("CAUTION".to_string()),
-//                 padding: true,
-//                 ..Default::default()
-//             },
-//         );
-//     }
 //
 //     /// Prints a table.
 //     pub fn table(&self, headers: Vec<&str>, rows: Vec<Vec<&str>>) {

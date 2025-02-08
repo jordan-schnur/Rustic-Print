@@ -1,13 +1,24 @@
+use std::io::{stdout, Write};
+use crossterm::{queue, style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor}, QueueableCommand};
 use rustic_print::RusticPrint;
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rustic_print = RusticPrint::new();
+
+
 
     // 1. info: A simple informational message.
     // rustic_print.info("This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
     //     rustic_print.info_multiple(vec!["This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "potato"]);
 
-    rustic_print.success("This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
+    rustic_print.success("This is an success message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+
+    //rustic_print.success_multiple(vec!["This is a success message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "This is an success message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit."]);
+
+
+    rustic_print.caution("This is a caution message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    rustic_print.caution(vec!["This is a success message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "This is an success message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an info message. Lorem ipsum dolor sit amet, consectetur adipiscing elit."]);
+
 
     // 2. block: Uses default block options.
     // rustic_print.block("This is a block message. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
@@ -85,4 +96,7 @@ fn main() {
     //     ..Default::default()  // fills in the missing field `escape`
     // };
     // rustic_print.fancy_block("This is a fancy block message with custom options.", custom_options);
+
+
+    Ok(())
 }

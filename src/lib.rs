@@ -128,7 +128,6 @@
 //!
 //! For more details on each function, please refer to the full [API Reference](https://docs.rs/rustic_print/latest/rustic_print/).
 
-
 pub mod block_options;
 mod messages;
 pub mod style_options;
@@ -138,28 +137,22 @@ use crate::block_options::BlockOptions;
 use crate::messages::Messages;
 use crate::style_options::StyleOptions;
 use crate::table::Table;
-use crossterm::cursor::MoveTo;
-use crossterm::style::{style, Attribute, Print, PrintStyledContent, SetColors, StyledContent};
+use crossterm::event::KeyModifiers;
+use crossterm::style::{style, Print, PrintStyledContent};
 use crossterm::{
     event,
     event::{read, Event, KeyCode},
-    execute, queue,
+    queue,
     style::{Color, ResetColor, SetBackgroundColor, SetForegroundColor, Stylize},
     terminal,
     terminal::{disable_raw_mode, enable_raw_mode},
-    ExecutableCommand, QueueableCommand,
 };
-use std::cmp::min;
 use std::error::Error;
-use std::fmt::Display;
-use std::io::{self, stdout, Read, Write};
+use std::io::{self, stdout, Write};
 use std::time::Duration;
-use crossterm::event::KeyModifiers;
-use crossterm::terminal::{Clear, ClearType};
-use textwrap::{fill, wrap, Options};
+use textwrap::{fill, Options};
 
 pub struct RusticPrint {}
-
 
 impl RusticPrint {
     /// Creates a new instance of `RusticPrint`.
@@ -407,7 +400,7 @@ impl RusticPrint {
     /// Panics if rendering the success block fails.
     pub fn success<T>(&self, messages: T)
     where
-        T: Into<Messages>
+        T: Into<Messages>,
     {
         self.render_block(
             messages,
@@ -615,7 +608,7 @@ impl RusticPrint {
         T: std::fmt::Display,
     {
         let mut stdout = stdout();
-        for (i, item) in items.iter().enumerate() {
+        for (_, item) in items.iter().enumerate() {
             queue!(stdout, Print(format!("* {}\n", item))).expect("Failed to queue print");
         }
 
@@ -721,8 +714,7 @@ impl RusticPrint {
 
         if input.trim().is_empty() {
             default
-        } else if input.trim().eq_ignore_ascii_case("yes")
-            || input.trim().eq_ignore_ascii_case("y")
+        } else if input.trim().eq_ignore_ascii_case("yes") || input.trim().eq_ignore_ascii_case("y")
         {
             true
         } else {
@@ -762,7 +754,9 @@ impl RusticPrint {
             stdout.flush().expect("Failed to flush stdout");
 
             let mut input = String::new();
-            io::stdin().read_line(&mut input).expect("Failed to read line");
+            io::stdin()
+                .read_line(&mut input)
+                .expect("Failed to read line");
             let input = input.trim();
 
             // Use the default value if the user provides no input.
@@ -882,7 +876,9 @@ impl RusticPrint {
                                     input_buffer.clear();
                                 }
                                 KeyCode::Char(c) => {
-                                    if c == 'c' && key_event.modifiers.contains(KeyModifiers::CONTROL) {
+                                    if c == 'c'
+                                        && key_event.modifiers.contains(KeyModifiers::CONTROL)
+                                    {
                                         disable_raw_mode().unwrap();
                                         std::process::exit(0);
                                     }
@@ -897,7 +893,10 @@ impl RusticPrint {
                                     }
                                     // Otherwise, if the text starts any choice (case-insensitive), update selection.
                                     for (i, &choice) in choices.iter().enumerate() {
-                                        if choice.to_lowercase().starts_with(&input_buffer.to_lowercase()) {
+                                        if choice
+                                            .to_lowercase()
+                                            .starts_with(&input_buffer.to_lowercase())
+                                        {
                                             selected_index = i;
                                             break;
                                         }
@@ -910,17 +909,19 @@ impl RusticPrint {
                             }
                             // Update the prompt line.
                             use crossterm::{
-                                queue,
-                                terminal::{Clear, ClearType},
                                 cursor::MoveTo,
-                                style::{SetForegroundColor, SetBackgroundColor, ResetColor, Color},
+                                queue,
+                                style::{
+                                    Color, ResetColor, SetBackgroundColor, SetForegroundColor,
+                                },
+                                terminal::{Clear, ClearType},
                             };
                             queue!(
-                            stdout,
-                            MoveTo(2, prompt_row),
-                            Clear(ClearType::UntilNewLine)
-                        )
-                                .unwrap();
+                                stdout,
+                                MoveTo(2, prompt_row),
+                                Clear(ClearType::UntilNewLine)
+                            )
+                            .unwrap();
 
                             if input_buffer.is_empty() {
                                 // If nothing has been typed, display the full default/suggestion in normal style.
@@ -928,17 +929,20 @@ impl RusticPrint {
                             } else {
                                 let suggestion = choices[selected_index];
                                 // If the suggestion begins with the user's input (case-insensitive)
-                                if suggestion.to_lowercase().starts_with(&input_buffer.to_lowercase()) {
+                                if suggestion
+                                    .to_lowercase()
+                                    .starts_with(&input_buffer.to_lowercase())
+                                {
                                     let remainder = &suggestion[input_buffer.len()..];
                                     // Print the user's input as usual.
                                     print!("{}", input_buffer);
                                     // Print the remainder with grey background and white foreground.
                                     queue!(
-                                    stdout,
-                                    SetForegroundColor(Color::White),
-                                    SetBackgroundColor(Color::Grey)
-                                )
-                                        .unwrap();
+                                        stdout,
+                                        SetForegroundColor(Color::White),
+                                        SetBackgroundColor(Color::Grey)
+                                    )
+                                    .unwrap();
                                     print!("{}", remainder);
                                     // Reset styling.
                                     queue!(stdout, ResetColor).unwrap();

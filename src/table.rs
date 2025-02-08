@@ -1,5 +1,4 @@
-use std::fmt::Display;
-use crossterm::style::{style, Stylize};
+use crossterm::style::Stylize;
 
 pub struct Table<'a> {
     headers: Vec<&'a str>,

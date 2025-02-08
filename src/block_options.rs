@@ -1,4 +1,3 @@
-use crate::messages::Messages;
 use crate::style_options::StyleOptions;
 
 #[derive(Debug, Clone)]

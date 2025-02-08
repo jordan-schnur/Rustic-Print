@@ -1,5 +1,5 @@
 #[derive(Clone, Debug)]
-pub(crate) enum Messages {
+pub enum Messages {
     Single(String),
     Multiple(Vec<String>),
 }

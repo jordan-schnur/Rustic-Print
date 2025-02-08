@@ -19,6 +19,7 @@ use crossterm::{
     ExecutableCommand, QueueableCommand,
 };
 use std::cmp::min;
+use std::error::Error;
 use std::io::{self, stdout, Read, Write};
 use std::time::Duration;
 use textwrap::{fill, wrap, Options};
@@ -32,16 +33,18 @@ impl RusticPrint {
     }
 
     /// Prints a simple block with the default block options.
-    // pub fn block(&self, message: &str) {
-    //     let block_options = BlockOptions::default();
-    //     self.fancy_block(message, block_options);
-    // }
+    pub fn block<T>(&self, messages: T, block_options: BlockOptions) -> ()
+    where
+        T: Into<Messages>,
+    {
+        self.render_block(messages, block_options).expect("Failed to render b");
+    }
 
-    pub fn fancy_block<T>(
+    fn render_block<T>(
         &self,
         message: T,
         block_options: BlockOptions,
-    ) -> Result<(), Box<dyn std::error::Error>>
+    ) -> Result<(), Box<dyn Error>>
     where
         T: Into<Messages>,
     {
@@ -120,6 +123,50 @@ impl RusticPrint {
         Ok(())
     }
 
+    fn render_underline_with_char(&self, message: &str, underline_char: char, style_options: Option<StyleOptions>) -> Result<(), Box<dyn Error>> {
+        let mut stdout = stdout();
+
+        let mut message = style(message);
+        let mut underline = style(underline_char.to_string().repeat(message.to_string().len()));
+
+        if let Some(style_options) = style_options {
+            if let Some(foreground) = style_options.foreground {
+                message = message.with(foreground);
+                underline
+                queue!(stdout, SetForegroundColor(foreground))?;
+            }
+            if let Some(background) = style_options.background {
+                underline = underline.on(background);
+                queue!(stdout, SetBackgroundColor(background))?;
+            }
+        }
+
+        queue!(stdout, PrintStyledContent(message), ResetColor, Print("\n"))?;
+
+
+        queue!(stdout, ResetColor, Print("\n"))?;
+        stdout.flush()?;
+
+        Ok(())
+    }
+    pub fn underline_with_char(&self, message: &str, underline_char: char, style_options: Option<StyleOptions>) {
+        self.render_underline_with_char(message, underline_char, style_options).expect("Failed to render underline");
+    }
+
+    pub fn title(&self, message: &str) {
+        self.underline_with_char(message, '=', Some(StyleOptions {
+            foreground: Some(Color::DarkGreen),
+            background: None
+        }));
+    }
+
+    pub fn section(&self, message: &str) {
+        self.underline_with_char(message, '-', Some(StyleOptions {
+            foreground: Some(Color::DarkGreen),
+            background: None
+        }));
+    }
+
     //     /// Prints a title in bold green with an underline.
     //     pub fn title(&self, message: &str) {
     //         let underline = "=".repeat(message.len());
@@ -172,7 +219,7 @@ impl RusticPrint {
     //
 
     pub fn success_multiple(&self, messages: Vec<&str>) {
-        self.fancy_block(
+        self.render_block(
             Messages::Multiple(messages.iter().map(|s| s.to_string()).collect()),
             BlockOptions {
                 style: Some(StyleOptions {
@@ -189,7 +236,7 @@ impl RusticPrint {
 
     /// Prints a success block with black text on a green background.
     pub fn success(&self, message: &str) {
-        self.fancy_block(
+        self.render_block(
             Messages::Single(message.to_string()),
             BlockOptions {
                 style: Some(StyleOptions {
@@ -208,7 +255,7 @@ impl RusticPrint {
     where
         T: Into<Messages>,
     {
-        self.fancy_block(
+        self.render_block(
             messages,
             BlockOptions {
                 style: Some(StyleOptions {
@@ -228,7 +275,7 @@ impl RusticPrint {
     where
         T: Into<Messages>,
     {
-        self.fancy_block(
+        self.render_block(
             messages,
             BlockOptions {
                 style: Some(StyleOptions {
@@ -248,7 +295,7 @@ impl RusticPrint {
     where
         T: Into<Messages>,
     {
-        self.fancy_block(
+        self.render_block(
             messages,
             BlockOptions {
                 prefix: " // ".to_string(),
@@ -262,7 +309,7 @@ impl RusticPrint {
     where
         T: Into<Messages>,
     {
-        self.fancy_block(
+        self.render_block(
             messages,
             BlockOptions {
                 style: Some(StyleOptions {
@@ -277,44 +324,13 @@ impl RusticPrint {
         .expect("Failed to print comment block");
     }
 
-    //
-    //     /// Prints a warning block with black text on a yellow background.
-    //     pub fn warning(&self, message: &str) {
-    //         self.fancy_block(
-    //             message,
-    //             BlockOptions {
-    //                 style: Some(StyleOptions {
-    //                     foreground: Some(Color::Black),
-    //                     background: Some(Color::Yellow),
-    //                 }),
-    //                 prefix: Some(" ".to_string()),
-    //                 name: Some("WARNING".to_string()),
-    //                 padding: true,
-    //                 ..Default::default()
-    //             },
-    //         );
-    //     }
-    //
-    //     /// Prints a note block with yellow text.
-    //     pub fn note(&self, message: &str) {
-    //         self.fancy_block(
-    //             message,
-    //             BlockOptions {
-    //                 style: Some(StyleOptions {
-    //                     foreground: Some(Color::Yellow),
-    //                     background: None,
-    //                 }),
-    //                 prefix: Some(" ! ".to_string()),
-    //                 name: Some("NOTE".to_string()),
-    //                 padding: false,
-    //                 ..Default::default()
-    //             },
-    //         );
-    //     }
-    //
-    pub fn info_multiple(&self, messages: Vec<&str>) {
-        self.fancy_block(
-            Messages::Multiple(messages.iter().map(|s| s.to_string()).collect()),
+    /// Prints an info block with yellow text.
+    pub fn info<T>(&self, messages: T)
+    where
+        T: Into<Messages>,
+    {
+        self.render_block(
+            messages,
             BlockOptions {
                 style: Some(StyleOptions {
                     foreground: Some(Color::Green),
@@ -328,21 +344,23 @@ impl RusticPrint {
         .expect("Failed to print info block");
     }
 
-    /// Prints an info block with yellow text.
-    pub fn info(&self, message: &str) {
-        self.fancy_block(
-            Messages::Single(message.to_string()),
+    pub fn note<T>(&self, messages: T)
+    where
+        T: Into<Messages>,
+    {
+        self.render_block(
+            messages,
             BlockOptions {
                 style: Some(StyleOptions {
-                    foreground: Some(Color::Green),
+                    foreground: Some(Color::DarkYellow),
                     background: None,
                 }),
-                block_type: Some("INFO".to_string()),
-                padding: true,
+                block_type: Some("NOTE".to_string()),
+                prefix: " ! ".to_string(),
                 ..Default::default()
             },
         )
-        .expect("Failed to print info block");
+            .expect("Failed to print info block");
     }
     //
     //     /// Prints a table.
@@ -548,7 +566,7 @@ fn print_padding_line(
     wrap_width: usize,
     block_options: &BlockOptions,
     prefix: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), Box<dyn Error>> {
     let line = if wrap_width > prefix.len() {
         format!("{}{}", prefix, " ".repeat(wrap_width - prefix.len()))
     } else {
@@ -598,7 +616,7 @@ fn styled_print_line(
     line: &str,
     wrap_width: usize,
     block_options: &BlockOptions,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), Box<dyn Error>> {
     let end_padding = " ".repeat(wrap_width.saturating_sub(line.len()));
     let mut styled = style(format!("{}{}", line, end_padding));
     if let Some(style_cfg) = &block_options.style {

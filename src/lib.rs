@@ -1081,19 +1081,3 @@ fn styled_print_line(
     queue!(stdout, PrintStyledContent(styled), ResetColor, Print("\n"))?;
     Ok(())
 }
-
-/// Helper function for the `choice` method: prints the choices with the current selection highlighted.
-///
-/// For the selected option, the text is rendered with inverted colors.
-fn print_choices(choices: &[&str], selected: usize) {
-    // For simplicity, reprint all choices.
-    // The selected option is rendered with inverted colors.
-    for (i, choice) in choices.iter().enumerate() {
-        if i == selected {
-            // For the selected option, use a black-on-white style.
-            println!("{}", format!("> {}", choice).black().on_white());
-        } else {
-            println!("  {}", choice);
-        }
-    }
-}

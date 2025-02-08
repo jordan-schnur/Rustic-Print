@@ -1,6 +1,6 @@
 [package]
 name = "rustic_print"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 description = "A versatile Rust library for enhancing console output. It offers a range of features to create a more engaging and informative command-line interface."
 license = "MIT"
@@ -15,4 +15,3 @@ categories = ["command-line-interface", "text-processing", "development-tools", 
 [dependencies]
 crossterm = "0.28.1"
 textwrap = "0.16.1"
-unicode-width = "0.2.0"
